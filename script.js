@@ -15,12 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
     signupBtn.addEventListener('click', function() {
         modalOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
     });
 
     // Close modal
     function closeModal() {
         modalOverlay.classList.remove('active');
         document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
     }
 
     closeBtn.addEventListener('click', closeModal);

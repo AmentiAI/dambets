@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Crash Game - The Damned Bets</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Eater&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .game-main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(220, 20, 60, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-title {
+            font-family: 'Eater', cursive;
+            font-size: 36px;
+            color: var(--crimson);
+            text-shadow: 0 0 20px var(--crimson);
+            margin-bottom: 10px;
+        }
+
+        .multiplier-display {
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid var(--crimson);
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 50px rgba(220, 20, 60, 0.5);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .multiplier-value {
+            font-size: 120px;
+            font-weight: 900;
+            color: var(--crimson);
+            text-shadow: 
+                0 0 20px var(--crimson),
+                0 0 40px var(--crimson),
+                0 0 60px var(--blood-red);
+            font-family: 'Eater', cursive;
+            line-height: 1;
+            transition: all 0.1s linear;
+        }
+
+        .multiplier-value.crashed {
+            color: #ff0000;
+            animation: crashPulse 0.5s ease;
+        }
+
+        @keyframes crashPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .multiplier-label {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .bitcoin-block {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            animation: blockRise 0.1s linear infinite;
+            filter: drop-shadow(0 0 10px var(--crimson));
+        }
+
+        @keyframes blockRise {
+            from { transform: translateX(-50%) translateY(0); }
+            to { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        .bitcoin-block.crashed {
+            animation: blockCrash 0.5s ease forwards;
+        }
+
+        @keyframes blockCrash {
+            0% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+            100% { transform: translateX(-50%) translateY(200px) rotate(360deg); opacity: 0; }
+        }
+
+        .game-controls {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(220, 20, 60, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .bet-section {
+            margin-bottom: 25px;
+        }
+
+        .bet-section label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bet-input-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .bet-input {
+            flex: 1;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .bet-input:focus {
+            border-color: var(--crimson);
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+
+        .bet-preset {
+            padding: 10px 15px;
+            background: rgba(220, 20, 60, 0.2);
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .bet-preset:hover {
+            background: rgba(220, 20, 60, 0.4);
+            border-color: var(--crimson);
+        }
+
+        .bet-presets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .game-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-start, .btn-cashout {
+            padding: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Eater', cursive;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--blood-red) 0%, var(--crimson) 100%);
+            color: #fff;
+            box-shadow: 0 0 30px rgba(220, 20, 60, 0.6);
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 0 40px rgba(220, 20, 60, 0.8);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-cashout {
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+            display: none;
+        }
+
+        .btn-cashout.active {
+            display: block;
+            animation: cashoutPulse 1s ease infinite;
+        }
+
+        @keyframes cashoutPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.6); }
+            50% { box-shadow: 0 0 50px rgba(0, 255, 0, 1); }
+        }
+
+        .btn-cashout:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .balance-card, .history-card, .stats-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(220, 20, 60, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-card h3, .history-card h3, .stats-card h3 {
+            font-family: 'Eater', cursive;
+            font-size: 20px;
+            color: var(--crimson);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px var(--crimson);
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 900;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+        }
+
+        .crash-history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .crash-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(220, 20, 60, 0.1);
+            border-left: 3px solid var(--crimson);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crash-value {
+            font-weight: 700;
+            color: var(--crimson);
+        }
+
+        .crash-value.high {
+            color: #00ff00;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--crimson);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .auto-cashout-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(220, 20, 60, 0.3);
+        }
+
+        .auto-cashout-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            margin-top: 10px;
+            outline: none;
+        }
+
+        .auto-cashout-input:focus {
+            border-color: var(--crimson);
+        }
+
+        .warning-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 69, 0, 0.3);
+            animation: warningFlash 0.3s ease;
+            pointer-events: none;
+        }
+
+        @keyframes warningFlash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 1024px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+
+            .multiplier-value {
+                font-size: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-main">
+            <div class="game-header">
+                <h1 class="game-title">⚡ BITCOIN CRASH GAME</h1>
+            </div>
+
+            <div class="multiplier-display" id="multiplierDisplay">
+                <div class="multiplier-value" id="multiplierValue">1.00x</div>
+                <div class="multiplier-label" id="multiplierLabel">Ready to Start</div>
+                <div class="bitcoin-block" id="bitcoinBlock">🪙</div>
+            </div>
+
+            <div class="game-controls">
+                <div class="bet-section">
+                    <label>Bet Amount (sats)</label>
+                    <div class="bet-input-wrapper">
+                        <input type="number" class="bet-input" id="betAmount" placeholder="0" min="1" value="1000">
+                    </div>
+                    <div class="bet-presets">
+                        <div class="bet-preset" data-amount="100">100</div>
+                        <div class="bet-preset" data-amount="500">500</div>
+                        <div class="bet-preset" data-amount="1000">1K</div>
+                        <div class="bet-preset" data-amount="5000">5K</div>
+                    </div>
+                </div>
+
+                <div class="auto-cashout-section">
+                    <label>Auto Cashout (optional)</label>
+                    <input type="number" class="auto-cashout-input" id="autoCashout" placeholder="e.g., 2.00" step="0.01" min="1.01">
+                </div>
+
+                <div class="game-buttons">
+                    <button class="btn-start" id="btnStart">START GAME</button>
+                    <button class="btn-cashout" id="btnCashout">CASHOUT</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="balance-card">
+                <h3>Balance</h3>
+                <div class="balance-amount" id="balance">100,000 sats</div>
+            </div>
+
+            <div class="stats-card">
+                <h3>Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalBets">0</div>
+                        <div class="stat-label">Total Bets</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalWins">0</div>
+                        <div class="stat-label">Wins</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalLosses">0</div>
+                        <div class="stat-label">Losses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profit">0</div>
+                        <div class="stat-label">Profit</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-card">
+                <h3>Crash History</h3>
+                <div class="crash-history" id="crashHistory">
+                    <div class="crash-item">
+                        <span>Waiting for game...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BitcoinCrashGame {
+            constructor() {
+                this.balance = 100000; // Starting balance in sats
+                this.currentMultiplier = 1.00;
+                this.isRunning = false;
+                this.crashPoint = null;
+                this.animationId = null;
+                this.startTime = null;
+                this.currentBet = 0;
+                this.autoCashout = null;
+                this.stats = {
+                    totalBets: 0,
+                    totalWins: 0,
+                    totalLosses: 0,
+                    profit: 0
+                };
+                this.crashHistory = [];
+
+                this.initializeElements();
+                this.attachEventListeners();
+                this.updateDisplay();
+            }
+
+            initializeElements() {
+                this.betInput = document.getElementById('betAmount');
+                this.autoCashoutInput = document.getElementById('autoCashout');
+                this.btnStart = document.getElementById('btnStart');
+                this.btnCashout = document.getElementById('btnCashout');
+                this.multiplierValue = document.getElementById('multiplierValue');
+                this.multiplierLabel = document.getElementById('multiplierLabel');
+                this.bitcoinBlock = document.getElementById('bitcoinBlock');
+                this.multiplierDisplay = document.getElementById('multiplierDisplay');
+                this.balanceDisplay = document.getElementById('balance');
+                this.crashHistoryEl = document.getElementById('crashHistory');
+            }
+
+            attachEventListeners() {
+                this.btnStart.addEventListener('click', () => this.startGame());
+                this.btnCashout.addEventListener('click', () => this.cashout());
+                
+                // Bet presets
+                document.querySelectorAll('.bet-preset').forEach(preset => {
+                    preset.addEventListener('click', () => {
+                        this.betInput.value = preset.dataset.amount;
+                    });
+                });
+
+                // Enter key to start
+                this.betInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !this.isRunning) {
+                        this.startGame();
+                    }
+                });
+            }
+
+            generateCrashPoint() {
+                // Simplified provably fair system
+                // In production, use server-side HMAC_SHA256
+                const serverSeed = 'damned_bets_secret_' + Date.now();
+                const clientSeed = Math.random().toString(36);
+                const nonce = this.stats.totalBets + 1;
+                
+                // Simulate hash (in production, use real crypto)
+                const hash = this.simpleHash(serverSeed + clientSeed + nonce);
+                const integer = parseInt(hash.substring(0, 13), 16);
+                const crashPoint = 1 + (integer % 1000) / 100; // 1.00x to 10.00x range
+                
+                // Add house edge (1%)
+                return Math.max(1.01, crashPoint * 0.99);
+            }
+
+            simpleHash(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return Math.abs(hash).toString(16);
+            }
+
+            startGame() {
+                const betAmount = parseInt(this.betInput.value);
+                
+                if (!betAmount || betAmount < 1) {
+                    alert('Please enter a valid bet amount');
+                    return;
+                }
+
+                if (betAmount > this.balance) {
+                    alert('Insufficient balance');
+                    return;
+                }
+
+                if (this.isRunning) return;
+
+                // Deduct bet
+                this.currentBet = betAmount;
+                this.balance -= betAmount;
+                this.stats.totalBets++;
+
+                // Get auto cashout value
+                const autoCashoutValue = parseFloat(this.autoCashoutInput.value);
+                this.autoCashout = autoCashoutValue && autoCashoutValue > 1.01 ? autoCashoutValue : null;
+
+                // Generate crash point
+                this.crashPoint = this.generateCrashPoint();
+
+                // Start game
+                this.isRunning = true;
+                this.currentMultiplier = 1.00;
+                this.startTime = Date.now();
+                
+                this.btnStart.disabled = true;
+                this.btnCashout.classList.add('active');
+                this.multiplierLabel.textContent = 'Game Running...';
+                this.bitcoinBlock.classList.remove('crashed');
+
+                // Start animation
+                this.animate();
+            }
+
+            animate() {
+                if (!this.isRunning) return;
+
+                const elapsed = (Date.now() - this.startTime) / 1000;
+                
+                // Exponential growth multiplier
+                this.currentMultiplier = 1.00 + (elapsed * 0.1);
+                
+                // Check auto cashout
+                if (this.autoCashout && this.currentMultiplier >= this.autoCashout) {
+                    this.cashout();
+                    return;
+                }
+
+                // Check crash
+                if (this.currentMultiplier >= this.crashPoint) {
+                    this.crash();
+                    return;
+                }
+
+                // Update display
+                this.updateMultiplierDisplay();
+
+                // Continue animation
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+
+            updateMultiplierDisplay() {
+                this.multiplierValue.textContent = this.currentMultiplier.toFixed(2) + 'x';
+                
+                // Color based on multiplier
+                if (this.currentMultiplier >= 5.00) {
+                    this.multiplierValue.style.color = '#00ff00';
+                    this.multiplierValue.style.textShadow = '0 0 20px #00ff00, 0 0 40px #00ff00';
+                } else if (this.currentMultiplier >= 2.00) {
+                    this.multiplierValue.style.color = var(--orange-red);
+                    this.multiplierValue.style.textShadow = '0 0 20px var(--orange-red), 0 0 40px var(--orange-red)';
+                } else {
+                    this.multiplierValue.style.color = var(--crimson);
+                    this.multiplierValue.style.textShadow = '0 0 20px var(--crimson), 0 0 40px var(--crimson)';
+                }
+
+                // Warning flash near crash
+                if (this.crashPoint - this.currentMultiplier < 0.5) {
+                    this.multiplierDisplay.classList.add('warning-flash');
+                    setTimeout(() => {
+                        this.multiplierDisplay.classList.remove('warning-flash');
+                    }, 300);
+                }
+            }
+
+            cashout() {
+                if (!this.isRunning) return;
+
+                const payout = Math.floor(this.currentBet * this.currentMultiplier);
+                this.balance += payout;
+                this.stats.totalWins++;
+                this.stats.profit += (payout - this.currentBet);
+
+                this.endGame(`Cashed out at ${this.currentMultiplier.toFixed(2)}x! Won ${payout.toLocaleString()} sats`);
+            }
+
+            crash() {
+                this.multiplierValue.classList.add('crashed');
+                this.bitcoinBlock.classList.add('crashed');
+                this.multiplierLabel.textContent = `Crashed at ${this.crashPoint.toFixed(2)}x`;
+
+                this.stats.totalLosses++;
+                this.stats.profit -= this.currentBet;
+
+                // Add to history
+                this.crashHistory.unshift({
+                    multiplier: this.crashPoint.toFixed(2),
+                    time: new Date().toLocaleTimeString()
+                });
+                if (this.crashHistory.length > 20) {
+                    this.crashHistory.pop();
+                }
+
+                this.endGame(`Crashed at ${this.crashPoint.toFixed(2)}x! Lost ${this.currentBet.toLocaleString()} sats`);
+            }
+
+            endGame(message) {
+                this.isRunning = false;
+                cancelAnimationFrame(this.animationId);
+                
+                this.btnStart.disabled = false;
+                this.btnCashout.classList.remove('active');
+                
+                setTimeout(() => {
+                    this.currentMultiplier = 1.00;
+                    this.multiplierValue.textContent = '1.00x';
+                    this.multiplierValue.classList.remove('crashed');
+                    this.multiplierValue.style.color = var(--crimson);
+                    this.multiplierValue.style.textShadow = '0 0 20px var(--crimson), 0 0 40px var(--crimson)';
+                    this.multiplierLabel.textContent = 'Ready to Start';
+                    this.bitcoinBlock.classList.remove('crashed');
+                    this.updateDisplay();
+                }, 3000);
+            }
+
+            updateDisplay() {
+                this.balanceDisplay.textContent = this.balance.toLocaleString() + ' sats';
+                
+                document.getElementById('totalBets').textContent = this.stats.totalBets;
+                document.getElementById('totalWins').textContent = this.stats.totalWins;
+                document.getElementById('totalLosses').textContent = this.stats.totalLosses;
+                
+                const profitEl = document.getElementById('profit');
+                profitEl.textContent = (this.stats.profit >= 0 ? '+' : '') + this.stats.profit.toLocaleString();
+                profitEl.style.color = this.stats.profit >= 0 ? '#00ff00' : '#ff0000';
+
+                // Update crash history
+                this.crashHistoryEl.innerHTML = '';
+                if (this.crashHistory.length === 0) {
+                    this.crashHistoryEl.innerHTML = '<div class="crash-item"><span>Waiting for game...</span></div>';
+                } else {
+                    this.crashHistory.forEach(item => {
+                        const crashItem = document.createElement('div');
+                        crashItem.className = 'crash-item';
+                        const multiplier = parseFloat(item.multiplier);
+                        crashItem.innerHTML = `
+                            <span>${item.time}</span>
+                            <span class="crash-value ${multiplier >= 2.0 ? 'high' : ''}">${item.multiplier}x</span>
+                        `;
+                        this.crashHistoryEl.appendChild(crashItem);
+                    });
+                }
+            }
+        }
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new BitcoinCrashGame();
+        });
+    </script>
+</body>
+</html>
+
