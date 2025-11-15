@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BB Gun Star Shoot - The Damned Bets</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Eater&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            min-height: calc(100vh - 40px);
+        }
+
+        /* Top Bar */
+        .top-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(220, 20, 60, 0.5);
+            border-radius: 15px;
+            padding: 20px 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-title {
+            font-family: 'Eater', cursive;
+            font-size: 36px;
+            color: var(--crimson);
+            text-shadow: 0 0 20px var(--crimson);
+        }
+
+        .balance-info {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .balance {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .block-info {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .block-number {
+            color: var(--crimson);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* Left Sidebar: Betting */
+        .betting-sidebar {
+            grid-column: 1;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .betting-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(220, 20, 60, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .betting-card h3 {
+            font-family: 'Eater', cursive;
+            font-size: 20px;
+            color: var(--crimson);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--crimson);
+        }
+
+        .character-bet {
+            background: rgba(220, 20, 60, 0.1);
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .character-bet:hover {
+            border-color: var(--crimson);
+            background: rgba(220, 20, 60, 0.2);
+        }
+
+        .character-bet.selected {
+            border-color: var(--crimson);
+            background: rgba(220, 20, 60, 0.3);
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+
+        .character-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .character-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .character-odds {
+            font-size: 16px;
+            color: #ffaa00;
+            font-weight: 700;
+        }
+
+        .bet-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .bet-amount-input {
+            flex: 1;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .bet-amount-input:focus {
+            border-color: var(--crimson);
+            box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+        }
+
+        .btn-bet-character {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--blood-red) 0%, var(--crimson) 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-bet-character:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
+        }
+
+        .btn-bet-character:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Center: Game Arena */
+        .game-arena {
+            grid-column: 2;
+            grid-row: 2;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(220, 20, 60, 0.5);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 600px;
+        }
+
+        .game-status {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .status-text {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Eater', cursive;
+            color: var(--crimson);
+            text-shadow: 0 0 20px var(--crimson);
+            margin-bottom: 10px;
+        }
+
+        .countdown-text {
+            font-size: 48px;
+            font-weight: 900;
+            color: #ffaa00;
+            text-shadow: 0 0 20px #ffaa00;
+        }
+
+        .target-area {
+            display: none;
+        }
+
+        .character-star-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .character-star-target {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Base star outline - always visible */
+        .star-outline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            border: 3px solid rgba(255, 255, 0, 0.8);
+            background: rgba(255, 255, 0, 0.1);
+            filter: drop-shadow(0 0 15px rgba(255, 255, 0, 0.6));
+            z-index: 0;
+        }
+
+        /* Progressive fill overlay */
+        .star-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            background: linear-gradient(180deg, rgba(255, 150, 0, 0.9) 0%, rgba(255, 200, 0, 0.9) 100%);
+            border: 2px solid rgba(255, 150, 0, 0.8);
+            box-shadow: 0 0 20px rgba(255, 150, 0, 0.6);
+            filter: drop-shadow(0 0 15px rgba(255, 150, 0, 0.8));
+            opacity: 0;
+            transform-origin: center;
+            transform: scale(0);
+            transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.6s ease;
+            z-index: 1;
+        }
+
+        .star-fill.complete {
+            background: linear-gradient(180deg, rgba(0, 255, 0, 1) 0%, rgba(100, 255, 100, 1) 100%);
+            border-color: #00ff00;
+            box-shadow: 0 0 40px #00ff00;
+            filter: drop-shadow(0 0 25px rgba(0, 255, 0, 1));
+            animation: completePulse 1s ease infinite;
+        }
+
+        @keyframes completePulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 40px #00ff00;
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 60px #00ff00;
+            }
+        }
+
+        /* Progress percentage display */
+        .star-progress {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.8),
+                0 0 20px rgba(255, 150, 0, 0.8);
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .star-progress.show {
+            opacity: 1;
+        }
+
+        .character-star-segment {
+            display: none; /* Hide old segment system */
+        }
+
+        .characters-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        .character {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            position: relative;
+        }
+
+        .character-avatar {
+            font-size: 80px;
+            filter: drop-shadow(0 0 10px var(--crimson));
+            transition: all 0.3s ease;
+        }
+
+        .character-avatar.shooting {
+            animation: shootAnimation 0.5s ease;
+            filter: drop-shadow(0 0 20px #ff0000);
+        }
+
+        @keyframes shootAnimation {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.1); }
+        }
+
+        .character-name-display {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+        }
+
+        .character-stats {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        .bb-bullet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffaa00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ffaa00;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .bb-bullet.flying {
+            opacity: 1;
+            animation: bulletFly 0.5s linear forwards;
+        }
+
+        @keyframes bulletFly {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Right Sidebar: Game Info */
+        .info-sidebar {
+            grid-column: 3;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(220, 20, 60, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-card h3 {
+            font-family: 'Eater', cursive;
+            font-size: 18px;
+            color: var(--crimson);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px var(--crimson);
+        }
+
+        .odds-list {
+            list-style: none;
+        }
+
+        .odds-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(220, 20, 60, 0.2);
+        }
+
+        .odds-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(220, 20, 60, 0.1);
+            border-left: 3px solid var(--crimson);
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .history-item.winner {
+            border-left-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .my-bets {
+            background: rgba(220, 20, 60, 0.1);
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .my-bet-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .winner-announcement {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            font-weight: 900;
+            font-family: 'Eater', cursive;
+            color: #00ff00;
+            text-shadow: 
+                0 0 20px #00ff00,
+                0 0 40px #00ff00,
+                0 0 60px #00ff00;
+            z-index: 100;
+            display: none;
+            text-align: center;
+        }
+
+        .winner-announcement.show {
+            display: block;
+            animation: winnerPulse 1s ease infinite;
+        }
+
+        @keyframes winnerPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @media (max-width: 1400px) {
+            .game-container {
+                grid-template-columns: 250px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+            }
+
+            .betting-sidebar {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .game-arena {
+                grid-column: 1;
+                grid-row: 3;
+            }
+
+            .info-sidebar {
+                grid-column: 1;
+                grid-row: 4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h1 class="game-title">🎯 BB GUN STAR SHOOT</h1>
+                <div class="balance-info">
+                <div class="block-info">
+                    <div>Next Game In:</div>
+                    <div class="block-number" id="nextGameTimer">2:00</div>
+                </div>
+                <div class="balance">
+                    Balance: <span id="balance">100,000</span> karma
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Sidebar: Betting -->
+        <div class="betting-sidebar">
+            <div class="betting-card">
+                <h3>Place Your Bets</h3>
+                
+                <div class="character-bet" data-character="1">
+                    <div class="character-header">
+                        <div class="character-name">Shooter 1</div>
+                        <div class="character-odds" id="odds1">2.5x</div>
+                    </div>
+                    <div class="bet-input-group">
+                        <input type="number" class="bet-amount-input" placeholder="Amount" min="1" data-character="1">
+                        <button class="btn-bet-character" data-character="1">BET</button>
+                    </div>
+                </div>
+
+                <div class="character-bet" data-character="2">
+                    <div class="character-header">
+                        <div class="character-name">Shooter 2</div>
+                        <div class="character-odds" id="odds2">3.0x</div>
+                    </div>
+                    <div class="bet-input-group">
+                        <input type="number" class="bet-amount-input" placeholder="Amount" min="1" data-character="2">
+                        <button class="btn-bet-character" data-character="2">BET</button>
+                    </div>
+                </div>
+
+                <div class="character-bet" data-character="3">
+                    <div class="character-header">
+                        <div class="character-name">Shooter 3</div>
+                        <div class="character-odds" id="odds3">2.8x</div>
+                    </div>
+                    <div class="bet-input-group">
+                        <input type="number" class="bet-amount-input" placeholder="Amount" min="1" data-character="3">
+                        <button class="btn-bet-character" data-character="3">BET</button>
+                    </div>
+                </div>
+
+                <div class="my-bets" id="myBets" style="display: none;">
+                    <h4 style="font-size: 14px; margin-bottom: 10px; color: var(--crimson);">Your Bets</h4>
+                    <div id="myBetsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Game Arena -->
+        <div class="game-arena">
+            <div class="game-status">
+                <div class="status-text" id="statusText">Waiting for next game...</div>
+                <div class="countdown-text" id="countdownText"></div>
+            </div>
+
+            <div class="characters-row">
+                <div class="character" data-character="1">
+                    <div class="character-star-container">
+                        <div class="character-star-target">
+                            <div class="star-outline"></div>
+                            <div class="star-fill" id="star1-fill"></div>
+                            <div class="star-progress" id="star1-progress">0%</div>
+                        </div>
+                    </div>
+                    <div class="character-avatar" id="avatar1">🔫</div>
+                    <div class="character-name-display">Shooter 1</div>
+                    <div class="character-stats">
+                        <div>Hits: <span id="hits1">0</span>/5</div>
+                        <div>Accuracy: <span id="accuracy1">0%</span></div>
+                    </div>
+                </div>
+
+                <div class="character" data-character="2">
+                    <div class="character-star-container">
+                        <div class="character-star-target">
+                            <div class="star-outline"></div>
+                            <div class="star-fill" id="star2-fill"></div>
+                            <div class="star-progress" id="star2-progress">0%</div>
+                        </div>
+                    </div>
+                    <div class="character-avatar" id="avatar2">🔫</div>
+                    <div class="character-name-display">Shooter 2</div>
+                    <div class="character-stats">
+                        <div>Hits: <span id="hits2">0</span>/5</div>
+                        <div>Accuracy: <span id="accuracy2">0%</span></div>
+                    </div>
+                </div>
+
+                <div class="character" data-character="3">
+                    <div class="character-star-container">
+                        <div class="character-star-target">
+                            <div class="star-outline"></div>
+                            <div class="star-fill" id="star3-fill"></div>
+                            <div class="star-progress" id="star3-progress">0%</div>
+                        </div>
+                    </div>
+                    <div class="character-avatar" id="avatar3">🔫</div>
+                    <div class="character-name-display">Shooter 3</div>
+                    <div class="character-stats">
+                        <div>Hits: <span id="hits3">0</span>/5</div>
+                        <div>Accuracy: <span id="accuracy3">0%</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="winner-announcement" id="winnerAnnouncement"></div>
+        </div>
+
+        <!-- Right Sidebar: Game Info -->
+        <div class="info-sidebar">
+            <div class="info-card">
+                <h3>Current Odds</h3>
+                <ul class="odds-list">
+                    <li class="odds-item">
+                        <span>Shooter 1</span>
+                        <span id="oddsDisplay1">2.5x</span>
+                    </li>
+                    <li class="odds-item">
+                        <span>Shooter 2</span>
+                        <span id="oddsDisplay2">3.0x</span>
+                    </li>
+                    <li class="odds-item">
+                        <span>Shooter 3</span>
+                        <span id="oddsDisplay3">2.8x</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>Game History</h3>
+                <div class="history-list" id="historyList">
+                    <div class="history-item">Waiting for games...</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Stats</h3>
+                <div class="stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--crimson);" id="totalBets">0</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.6);">Total Bets</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--crimson);" id="totalWins">0</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.6);">Wins</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--crimson);" id="totalLosses">0</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.6);">Losses</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--crimson);" id="profit">0</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.6);">Profit</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BBGunStarShoot {
+            constructor() {
+                this.balance = 100000;
+                this.gameState = 'WAITING'; // WAITING, COUNTDOWN, RUNNING, FINISHED
+                this.countdown = 10;
+                this.myBets = [];
+                this.allBets = [];
+                this.characters = [
+                    { id: 1, name: 'Shooter 1', hits: 0, shots: 0, odds: 2.5 },
+                    { id: 2, name: 'Shooter 2', hits: 0, shots: 0, odds: 3.0 },
+                    { id: 3, name: 'Shooter 3', hits: 0, shots: 0, odds: 2.8 }
+                ];
+                this.starSegments = 5;
+                this.winner = null;
+                this.gameHistory = [];
+                this.stats = {
+                    totalBets: 0,
+                    totalWins: 0,
+                    totalLosses: 0,
+                    profit: 0
+                };
+                this.timeUntilNextGame = 120; // 2 minutes in seconds
+
+                this.initializeElements();
+                this.attachEventListeners();
+                this.updateDisplay();
+                this.startTimer();
+                // Start first game immediately
+                setTimeout(() => this.startNewGame(), 1000);
+            }
+
+            initializeElements() {
+                this.balanceEl = document.getElementById('balance');
+                this.nextGameTimerEl = document.getElementById('nextGameTimer');
+                this.statusText = document.getElementById('statusText');
+                this.countdownText = document.getElementById('countdownText');
+                this.targetArea = document.getElementById('targetArea');
+                this.winnerAnnouncement = document.getElementById('winnerAnnouncement');
+                this.historyList = document.getElementById('historyList');
+                this.myBetsEl = document.getElementById('myBets');
+                this.myBetsList = document.getElementById('myBetsList');
+            }
+
+            attachEventListeners() {
+                document.querySelectorAll('.btn-bet-character').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const characterId = parseInt(btn.dataset.character);
+                        const input = document.querySelector(`.bet-amount-input[data-character="${characterId}"]`);
+                        this.placeBet(characterId, parseInt(input.value));
+                    });
+                });
+            }
+
+            startTimer() {
+                // Update timer every second
+                setInterval(() => {
+                    if (this.gameState === 'WAITING') {
+                        this.timeUntilNextGame--;
+                        
+                        if (this.timeUntilNextGame <= 0) {
+                            this.timeUntilNextGame = 120; // Reset to 2 minutes
+                            this.startNewGame();
+                        } else {
+                            const minutes = Math.floor(this.timeUntilNextGame / 60);
+                            const seconds = this.timeUntilNextGame % 60;
+                            this.nextGameTimerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        }
+                    } else {
+                        // Game is running, show countdown will reset after game ends
+                        this.nextGameTimerEl.textContent = '--:--';
+                    }
+                }, 1000);
+            }
+
+            startNewGame() {
+                this.gameState = 'COUNTDOWN';
+                this.countdown = 10;
+                this.winner = null;
+                this.characters.forEach(char => {
+                    char.hits = 0;
+                    char.shots = 0;
+                });
+
+                // Reset all 3 stars
+                for (let charId = 1; charId <= 3; charId++) {
+                    const fill = document.getElementById(`star${charId}-fill`);
+                    const progress = document.getElementById(`star${charId}-progress`);
+                    if (fill) {
+                        fill.style.opacity = '0';
+                        fill.style.transform = 'scale(0)';
+                        fill.classList.remove('complete');
+                    }
+                    if (progress) {
+                        progress.textContent = '0%';
+                        progress.classList.remove('show');
+                    }
+                }
+
+                // Update odds randomly
+                this.updateOdds();
+
+                this.startCountdown();
+            }
+
+            startCountdown() {
+                this.countdownText.style.display = 'block';
+                const countdownInterval = setInterval(() => {
+                    this.countdown--;
+                    this.countdownText.textContent = this.countdown;
+                    this.statusText.textContent = `Game starting in ${this.countdown}...`;
+
+                    if (this.countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        this.countdownText.style.display = 'none';
+                        this.gameState = 'RUNNING';
+                        this.statusText.textContent = 'GAME RUNNING - SHOOT THE STAR!';
+                        this.startShooting();
+                    }
+                }, 1000);
+            }
+
+            updateOdds() {
+                // Randomize odds between 2.0x and 4.0x
+                this.characters.forEach(char => {
+                    char.odds = (2 + Math.random() * 2).toFixed(1);
+                });
+
+                document.getElementById('odds1').textContent = this.characters[0].odds + 'x';
+                document.getElementById('odds2').textContent = this.characters[1].odds + 'x';
+                document.getElementById('odds3').textContent = this.characters[2].odds + 'x';
+                document.getElementById('oddsDisplay1').textContent = this.characters[0].odds + 'x';
+                document.getElementById('oddsDisplay2').textContent = this.characters[1].odds + 'x';
+                document.getElementById('oddsDisplay3').textContent = this.characters[2].odds + 'x';
+            }
+
+            startShooting() {
+                const shootInterval = setInterval(() => {
+                    if (this.gameState !== 'RUNNING') {
+                        clearInterval(shootInterval);
+                        return;
+                    }
+
+                    // All characters shoot simultaneously at their own stars
+                    this.characters.forEach(shooter => {
+                        this.shoot(shooter);
+                        
+                        // Check if this character's star is complete (100%)
+                        if (shooter.hits >= this.starSegments && !this.winner) {
+                            clearInterval(shootInterval);
+                            this.endGame(shooter);
+                        }
+                    });
+                }, 800); // Shoot every 800ms - slower for more competitive feel
+            }
+
+            shoot(shooter) {
+                // Don't shoot if this character already won
+                if (shooter.hits >= this.starSegments) {
+                    return;
+                }
+
+                shooter.shots++;
+                
+                // Animate avatar
+                const avatar = document.getElementById(`avatar${shooter.id}`);
+                avatar.classList.add('shooting');
+                setTimeout(() => avatar.classList.remove('shooting'), 500);
+
+                // Random accuracy (60-90%)
+                const accuracy = 60 + Math.random() * 30;
+                const hit = Math.random() * 100 < accuracy;
+
+                if (hit && shooter.hits < this.starSegments) {
+                    // Increment hits gradually (partial progress per hit)
+                    shooter.hits += 0.2; // Each hit adds 20% progress (5 hits = 100%)
+                    if (shooter.hits > this.starSegments) {
+                        shooter.hits = this.starSegments;
+                    }
+                    
+                    // Update star fill progress
+                    this.updateStarProgress(shooter);
+                }
+
+                // Update stats
+                const accuracyPercent = shooter.shots > 0 ? Math.round((shooter.hits / shooter.shots) * 100) : 0;
+                const displayHits = Math.floor(shooter.hits);
+                document.getElementById(`hits${shooter.id}`).textContent = displayHits;
+                document.getElementById(`accuracy${shooter.id}`).textContent = accuracyPercent + '%';
+
+                // Create bullet animation to this character's star
+                this.createBullet(shooter.id);
+            }
+
+            updateStarProgress(shooter) {
+                const fill = document.getElementById(`star${shooter.id}-fill`);
+                const progress = document.getElementById(`star${shooter.id}-progress`);
+                
+                if (!fill || !progress) return;
+                
+                // Calculate percentage (0-100%)
+                const percent = Math.min(100, Math.round((shooter.hits / this.starSegments) * 100));
+                
+                // Update fill opacity based on progress
+                fill.style.opacity = (percent / 100).toString();
+                fill.style.transform = `scale(${percent / 100})`;
+                
+                // Show progress text
+                progress.textContent = percent + '%';
+                if (percent > 0) {
+                    progress.classList.add('show');
+                }
+                
+                // Mark as complete when 100%
+                if (percent >= 100) {
+                    fill.classList.add('complete');
+                    progress.textContent = '100%';
+                }
+            }
+
+            createBullet(characterId) {
+                const bullet = document.createElement('div');
+                bullet.className = 'bb-bullet';
+                
+                const characterEl = document.querySelector(`.character[data-character="${characterId}"]`);
+                const starContainer = characterEl.querySelector('.character-star-container');
+                
+                const characterRect = characterEl.getBoundingClientRect();
+                const starRect = starContainer.getBoundingClientRect();
+                
+                const startX = characterRect.left + characterRect.width / 2;
+                const startY = characterRect.top + characterRect.height - 100; // From avatar area
+                const endX = starRect.left + starRect.width / 2;
+                const endY = starRect.top + starRect.height / 2;
+                
+                bullet.style.left = startX + 'px';
+                bullet.style.top = startY + 'px';
+                
+                document.body.appendChild(bullet);
+                
+                setTimeout(() => {
+                    bullet.style.left = endX + 'px';
+                    bullet.style.top = endY + 'px';
+                    bullet.classList.add('flying');
+                }, 10);
+                
+                setTimeout(() => bullet.remove(), 600);
+            }
+
+            endGame(winner) {
+                this.gameState = 'FINISHED';
+                this.winner = winner;
+                
+                // Show winner announcement
+                this.winnerAnnouncement.textContent = `${winner.name} WINS!`;
+                this.winnerAnnouncement.classList.add('show');
+                
+                this.statusText.textContent = `${winner.name} completed the star!`;
+                
+                // Process bets
+                this.processBets(winner);
+                
+                // Add to history
+                this.gameHistory.unshift({
+                    round: this.gameHistory.length + 1,
+                    winner: winner.name,
+                    time: new Date().toLocaleTimeString()
+                });
+                if (this.gameHistory.length > 20) {
+                    this.gameHistory.pop();
+                }
+                
+                this.updateDisplay();
+                
+                // Reset after 5 seconds
+                setTimeout(() => {
+                    this.winnerAnnouncement.classList.remove('show');
+                    this.gameState = 'WAITING';
+                    this.timeUntilNextGame = 120; // Reset timer to 2 minutes
+                    this.statusText.textContent = 'Waiting for next game...';
+                    this.updateDisplay();
+                }, 5000);
+            }
+
+            placeBet(characterId, amount) {
+                if (this.gameState !== 'WAITING' && this.gameState !== 'COUNTDOWN') {
+                    alert('Bets are closed! Game is running.');
+                    return;
+                }
+
+                if (!amount || amount < 1) {
+                    alert('Please enter a valid bet amount');
+                    return;
+                }
+
+                if (amount > this.balance) {
+                    alert('Insufficient balance');
+                    return;
+                }
+
+                const character = this.characters.find(c => c.id === characterId);
+                const bet = {
+                    characterId: characterId,
+                    characterName: character.name,
+                    amount: amount,
+                    odds: parseFloat(character.odds)
+                };
+
+                this.myBets.push(bet);
+                this.allBets.push(bet);
+                this.balance -= amount;
+                this.stats.totalBets++;
+
+                // Highlight selected character
+                document.querySelector(`.character-bet[data-character="${characterId}"]`).classList.add('selected');
+
+                this.updateDisplay();
+            }
+
+            processBets(winner) {
+                this.myBets.forEach(bet => {
+                    if (bet.characterId === winner.id) {
+                        const payout = Math.floor(bet.amount * bet.odds);
+                        this.balance += payout;
+                        this.stats.totalWins++;
+                        this.stats.profit += (payout - bet.amount);
+                    } else {
+                        this.stats.totalLosses++;
+                        this.stats.profit -= bet.amount;
+                    }
+                });
+
+                // Clear bets for next round
+                this.myBets = [];
+            }
+
+            updateDisplay() {
+                this.balanceEl.textContent = this.balance.toLocaleString();
+
+                // Update my bets display
+                if (this.myBets.length > 0) {
+                    this.myBetsEl.style.display = 'block';
+                    this.myBetsList.innerHTML = '';
+                    this.myBets.forEach(bet => {
+                        const item = document.createElement('div');
+                        item.className = 'my-bet-item';
+                        item.innerHTML = `
+                            <span>${bet.characterName}</span>
+                            <span>${bet.amount.toLocaleString()} karma @ ${bet.odds}x</span>
+                        `;
+                        this.myBetsList.appendChild(item);
+                    });
+                } else {
+                    this.myBetsEl.style.display = 'none';
+                }
+
+                // Update history
+                this.historyList.innerHTML = '';
+                if (this.gameHistory.length === 0) {
+                    this.historyList.innerHTML = '<div class="history-item">Waiting for games...</div>';
+                } else {
+                    this.gameHistory.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item winner';
+                        historyItem.innerHTML = `
+                            <div>Round #${item.round}</div>
+                            <div style="font-weight: 700; color: #00ff00;">${item.winner} won!</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.5);">${item.time}</div>
+                        `;
+                        this.historyList.appendChild(historyItem);
+                    });
+                }
+
+                // Update stats
+                document.getElementById('totalBets').textContent = this.stats.totalBets;
+                document.getElementById('totalWins').textContent = this.stats.totalWins;
+                document.getElementById('totalLosses').textContent = this.stats.totalLosses;
+                const profitEl = document.getElementById('profit');
+                profitEl.textContent = (this.stats.profit >= 0 ? '+' : '') + this.stats.profit.toLocaleString();
+                profitEl.style.color = this.stats.profit >= 0 ? '#00ff00' : '#ff0000';
+
+                // Disable bet buttons during game
+                const canBet = this.gameState === 'WAITING' || this.gameState === 'COUNTDOWN';
+                document.querySelectorAll('.btn-bet-character').forEach(btn => {
+                    btn.disabled = !canBet;
+                });
+            }
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            new BBGunStarShoot();
+        });
+    </script>
+</body>
+</html>
+

@@ -735,7 +735,7 @@
             <div class="balance-card">
                 <div class="balance-label">Balance</div>
                 <div class="balance-amount" id="balance">100,000</div>
-                <div class="user-info">sats</div>
+                <div class="user-info">karma</div>
             </div>
         </div>
 
@@ -761,7 +761,7 @@
         <div class="betting-panel">
             <div class="bet-controls">
                 <div class="bet-input-group">
-                    <label>Bet Amount (sats)</label>
+                    <label>Bet Amount (karma)</label>
                     <input type="number" class="bet-input" id="betAmount" placeholder="0" min="1" value="1000">
                     <div class="bet-presets">
                         <div class="bet-preset" data-amount="100">100</div>
@@ -793,7 +793,7 @@
                 </div>
                 <div class="bet-info-row">
                     <span>Potential Win:</span>
-                    <span id="potentialWin">0 sats</span>
+                    <span id="potentialWin">0 karma</span>
                 </div>
             </div>
 
@@ -818,11 +818,11 @@
                 </div>
                 <div class="round-stats-row">
                     <span>Total Amount:</span>
-                    <span id="totalAmount">0 sats</span>
+                    <span id="totalAmount">0 karma</span>
                 </div>
                 <div class="round-stats-row">
                     <span>Paid Out:</span>
-                    <span id="paidOut">0 sats</span>
+                    <span id="paidOut">0 karma</span>
                 </div>
             </div>
         </div>
@@ -1153,7 +1153,7 @@
                 this.goalText.style.display = 'none';
                 this.btnCashout.classList.remove('active', 'danger');
                 this.betInfo.classList.remove('active');
-                this.multiplierLabel.textContent = `Cashed out at ${this.currentMultiplier.toFixed(2)}x! Won ${payout.toLocaleString()} sats!`;
+                this.multiplierLabel.textContent = `Cashed out at ${this.currentMultiplier.toFixed(2)}x! Won ${payout.toLocaleString()} karma!`;
                 
                 this.updateDisplay();
                 this.updatePlayersList();
@@ -1243,10 +1243,10 @@
             updateBetInfo() {
                 if (this.userBet && this.userBet.status === "ACTIVE") {
                     this.betInfo.classList.add('active');
-                    this.myBetAmount.textContent = this.userBet.amount.toLocaleString() + ' sats';
+                    this.myBetAmount.textContent = this.userBet.amount.toLocaleString() + ' karma';
                     this.currentMultiplierEl.textContent = this.currentMultiplier.toFixed(2) + 'x';
                     const potential = Math.floor(this.userBet.amount * this.currentMultiplier);
-                    this.potentialWin.textContent = potential.toLocaleString() + ' sats';
+                    this.potentialWin.textContent = potential.toLocaleString() + ' karma';
                 }
             }
 
@@ -1278,7 +1278,7 @@
                         item.innerHTML = `
                             <div>
                                 <div class="player-name">${bet.userName}</div>
-                                <div class="player-amount">${bet.amount.toLocaleString()} sats</div>
+                                <div class="player-amount">${bet.amount.toLocaleString()} karma</div>
                             </div>
                             <div class="player-status">${statusText}</div>
                         `;
@@ -1294,8 +1294,8 @@
                     .reduce((sum, b) => sum + Math.floor(b.amount * b.cashedOutAt), 0);
                 
                 document.getElementById('totalBets').textContent = totalBets;
-                document.getElementById('totalAmount').textContent = totalAmount.toLocaleString() + ' sats';
-                document.getElementById('paidOut').textContent = paidOut.toLocaleString() + ' sats';
+                document.getElementById('totalAmount').textContent = totalAmount.toLocaleString() + ' karma';
+                document.getElementById('paidOut').textContent = paidOut.toLocaleString() + ' karma';
             }
 
             updateDisplay() {

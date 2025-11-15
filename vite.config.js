@@ -11,7 +11,8 @@ export default defineConfig({
       input: {
         main: './index.html',
         game: './game.html',
-        new: './new.html'
+        new: './new.html',
+        can: './can.html'
       }
     }
   }
